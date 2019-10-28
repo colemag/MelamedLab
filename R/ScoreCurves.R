@@ -16,10 +16,10 @@ ScoreCurve <- function(data, title, stats, alt.heights){
   EAElong$Day <- as.numeric(EAElong$Day)
   EAElong$Score <- as.numeric(EAElong$Score)
   if(missing(stats)){
-    resA <- compare_means(Score ~ TGS ,EAElong, method = 'kruskal.test', group.by = c("Day"), paired = F)
+    resA <- compare_means(Score ~ TGS, EAElong, method = 'kruskal.test', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
   } else if (stats == 'parametric'){
-    resA <- compare_means(Score ~ TGS ,EAElong, method = 'anova', group.by = c("Day"), paired = F)
+    resA <- compare_means(Score ~ TGS, EAElong, method = 'anova', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 't.test', group.by = c("Day"), paired = F)
   } else {
     resA <- compare_means(Score ~ TGS ,EAElong, method = 'kruskal.test', group.by = c("Day"), paired = F)
