@@ -133,7 +133,7 @@ ScoreCurve <- function(data, title, colormatch = NULL, stats = NULL, alt.heights
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
     #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-    if(is.null(colormatch)){
+    if(missing(colormatch)){
     ggob = ggob
     } else {
     ggob = ggob + scale_color_manual(values = colormatch)
