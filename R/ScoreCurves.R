@@ -1,4 +1,4 @@
-ScoreCurve <- function(data, title, stats, colormatch, alt.heights){
+ScoreCurve <- function(data, title, stats, alt.heights){
   require(ggplot2)
   require(ggpubr)
   require(dplyr)
@@ -64,14 +64,13 @@ ScoreCurve <- function(data, title, stats, colormatch, alt.heights){
                 y = "Score",
                 x = "Day", group = "TGS", add = "mean_se", width = 5,
                 color = "TGS")
-  #sel = (0.01 < resA$p.adj & resA$p.adj < 0.05)
-  #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-  if(is.null(colormatch)){
-  ggob = ggob
-  } else {
-    ggob = ggob + scale_color_manual(
-      values = colormatch)
-  }
+
+  # if(is.null(colormatch)){
+  # ggob = ggob
+  # } else {
+  #   ggob = ggob + scale_color_manual(
+  #     values = colormatch)
+  # }
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
   # ggob = ggob + labs(fill = "Treatment Group and Sex")
@@ -134,11 +133,11 @@ ScoreCurve <- function(data, title, stats, colormatch, alt.heights){
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
     #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-    if(is.null(colormatch)){
-    ggob = ggob
-    } else {
-    ggob = ggob + scale_color_manual(values = colormatch)
-    }
+    # if(is.null(colormatch)){
+    # ggob = ggob
+    # } else {
+    # ggob = ggob + scale_color_manual(values = colormatch)
+    # }
     ggob = ggob + ylab('Disease Score')
     ggob = ggob + ggtitle(title)
     # ggob = ggob + labs(fill = "Treatment Group and Sex")
