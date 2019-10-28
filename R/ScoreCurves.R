@@ -68,9 +68,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
   if(missing(colormatch)){
   ggob = ggob
   } else {
-    ggob = ggob + pallete
-    ggob = ggob + scale_colour_manual(
-      values = colormatch)
+    ggob = ggob + pallete(values = colormatch)
   }
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
