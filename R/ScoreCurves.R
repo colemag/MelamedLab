@@ -1,4 +1,4 @@
-ScoreCurve <- function(data, title, colors, stats, alt.heights){
+ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
   require(ggplot2)
   require(ggpubr)
   require(dplyr)
@@ -65,12 +65,12 @@ ScoreCurve <- function(data, title, colors, stats, alt.heights){
                 x = "Day", group = "TGS", add = "mean_se", width = 5,
                 color = "TGS")
 
-  if(missing(colors)){
+  if(missing(colormatch)){
   ggob = ggob
   } else {
     ggob = ggob + pallete
     ggob = ggob + scale_colour_manual(
-      values = colors)
+      values = colormatch)
   }
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
@@ -134,10 +134,10 @@ ScoreCurve <- function(data, title, colors, stats, alt.heights){
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
     #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-    if(missing(colors)){
+    if(missing(colormatch)){
     ggob = ggob
     } else {
-    ggob = ggob + scale_color_manual(values = colors)
+    ggob = ggob + scale_color_manual(values = colormatch)
     }
     ggob = ggob + ylab('Disease Score')
     ggob = ggob + ggtitle(title)
