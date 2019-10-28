@@ -35,7 +35,8 @@ ScoreCurve <- function(data, colors, title, stats, colormatch, alt.heights){
     summarise_all(funs(mean))
 
   MaxScores <- aggregate(Score ~ Day, data = Mean, max)
-  resA$max <- MaxScores$Score
+  resA <- merge(resA, MaxScores, by=c('Day', 'Day'))
+  colnames(resA)[colnames(resA)=="Score"] <- "max"
 
   resA <- resA[resA$p.adj != 'NaN', ]
   if (missing(alt.heights)){
@@ -69,7 +70,7 @@ ScoreCurve <- function(data, colors, title, stats, colormatch, alt.heights){
     ggob = ggob + color_palette(colors)
   } else if (missing(colors)){
     ggob = ggob + scale_color_manual(
-      values = c("Alcohol Male" = 'dodgerblue', "Alcohol Female"='red',"Control Male"= 'darkblue',"Control Female"= 'darkred'))
+      values = colormatch)
   }
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
@@ -110,11 +111,11 @@ ScoreCurve <- function(data, colors, title, stats, colormatch, alt.heights){
     resTloaded <- merge(loaded_df, MaxScores1, by.x = 'Day', by.y = 'Day')
     if (missing(alt.heights)){
       resTloaded$p.adj.star1 <- ifelse(resTloaded$p < 0.05, '*', "")
-      resTloaded$p.adj.star1.height <- resTloaded$Score + 0.5
+      resTloaded$p.adj.star1.height <- resTloaded$Score + 0.45
       resTloaded$p.adj.star2 <- ifelse(resTloaded$p < 0.01, '*', "")
-      resTloaded$p.adj.star2.height <- resTloaded$Score + 0.65
+      resTloaded$p.adj.star2.height <- resTloaded$Score + 0.6
       resTloaded$p.adj.star3 <- ifelse(resTloaded$p < 0.001, '*', "")
-      resTloaded$p.adj.star3.height <- resTloaded$Score + 0.85
+      resTloaded$p.adj.star3.height <- resTloaded$Score + 0.75
     } else {
       resA$p.adj.star1 <- ifelse(resA$p < 0.05, '*', "")
       resA$p.adj.star1.height <- resA$max + alt.heights[1]
