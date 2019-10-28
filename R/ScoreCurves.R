@@ -1,4 +1,4 @@
-ScoreCurve <- function(data, title, colormatch = NULL, stats = NULL, alt.heights = NULL){
+ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
   require(ggplot2)
   require(ggpubr)
   require(dplyr)
@@ -15,7 +15,7 @@ ScoreCurve <- function(data, title, colormatch = NULL, stats = NULL, alt.heights
   EAElong <- EAEdata %>% gather('Day', 'Score', -'Treatment', -"Sex", -"TGS")
   EAElong$Day <- as.numeric(EAElong$Day)
   EAElong$Score <- as.numeric(EAElong$Score)
-  if(is.null(stats)){
+  if(missing(stats)){
     resA <- compare_means(Score ~ TGS, EAElong, method = 'kruskal.test', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
   } else if (stats == 'parametric'){
@@ -39,7 +39,7 @@ ScoreCurve <- function(data, title, colormatch = NULL, stats = NULL, alt.heights
   colnames(resA)[colnames(resA)=="Score"] <- "max"
 
   resA <- resA[resA$p.adj != 'NaN', ]
-  if (is.null(alt.heights)){
+  if (missing(alt.heights)){
     resA$p.adj.star1 <- ifelse(resA$p < 0.05, '*', "")
     resA$p.adj.star1.height <- resA$max + 0.5
     resA$p.adj.star2 <- ifelse(resA$p < 0.01, '*', "")
@@ -65,7 +65,7 @@ ScoreCurve <- function(data, title, colormatch = NULL, stats = NULL, alt.heights
                 x = "Day", group = "TGS", add = "mean_se", width = 5,
                 color = "TGS")
 
-  if(is.null(colormatch)){
+  if(missing(colormatch)){
   ggob = ggob
   } else {
     ggob = ggob + scale_color_manual(
@@ -108,7 +108,7 @@ ScoreCurve <- function(data, title, colormatch = NULL, stats = NULL, alt.heights
     colnames(loaded_df)[1] <- 'Day'
     colnames(loaded_df)[5] <- 'p'
     resTloaded <- merge(loaded_df, MaxScores1, by.x = 'Day', by.y = 'Day')
-    if (is.null(alt.heights)){
+    if (missing(alt.heights)){
       resTloaded$p.adj.star1 <- ifelse(resTloaded$p < 0.05, '*', "")
       resTloaded$p.adj.star1.height <- resTloaded$Score + 0.45
       resTloaded$p.adj.star2 <- ifelse(resTloaded$p < 0.01, '*', "")
