@@ -1,4 +1,4 @@
-ScoreCurve <- function(data, colors, title, stats, colormatch, alt.heights){
+ScoreCurve <- function(data, title, stats, colormatch, alt.heights){
   require(ggplot2)
   require(ggpubr)
   require(dplyr)
@@ -66,9 +66,9 @@ ScoreCurve <- function(data, colors, title, stats, colormatch, alt.heights){
                 color = "TGS")
   #sel = (0.01 < resA$p.adj & resA$p.adj < 0.05)
   #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-  if(missing(colormatch)){
-    ggob = ggob + color_palette(colors)
-  }else if (missing(colors)){
+  if (missing(colors)){
+
+  } else {
     ggob = ggob + scale_color_manual(
       values = colormatch)
   }
@@ -134,9 +134,9 @@ ScoreCurve <- function(data, colors, title, stats, colormatch, alt.heights){
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
     #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-    if (missing(colormatch)){
-      ggob = ggob + color_palette(colors)
-    } else if (missing(colors)){
+    if (missing(colors)){
+
+    } else {
       ggob = ggob + scale_color_manual(
         values = colormatch)
     }
