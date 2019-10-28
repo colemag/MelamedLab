@@ -1,4 +1,4 @@
-ScoreCurve <- function(data, colors, title, stats){
+ScoreCurve <- function(data, colors, title, stats, colormatch, alt.heights){
   require(ggplot2)
   require(ggpubr)
   require(dplyr)
@@ -9,7 +9,7 @@ ScoreCurve <- function(data, colors, title, stats){
     rownames(tdf) = colnames(df)
     return(data.frame(tdf, check.names=FALSE, stringsAsFactors=FALSE))
   }
-  EAEdata <- data
+  EAEdata <- na.omit(data)
   colnames(EAEdata) <- gsub('X', '', colnames(EAEdata))
   EAEdata$TGS <- paste(EAEdata$Treatment, EAEdata$Sex)
   EAElong <- EAEdata %>% gather('Day', 'Score', -'Treatment', -"Sex", -"TGS")
@@ -38,15 +38,26 @@ ScoreCurve <- function(data, colors, title, stats){
   resA$max <- MaxScores$Score
 
   resA <- resA[resA$p.adj != 'NaN', ]
+  if (missing(alt.heights)){
+    resA$p.adj.star1 <- ifelse(resA$p < 0.05, '*', "")
+    resA$p.adj.star1.height <- resA$max + 0.5
+    resA$p.adj.star2 <- ifelse(resA$p < 0.01, '*', "")
+    resA$p.adj.star2.height <- resA$max + 0.65
+    resA$p.adj.star3 <- ifelse(resA$p < 0.001, '*', "")
+    resA$p.adj.star3.height <- resA$max + 0.80
 
-  resA$p.adj.star1 <- ifelse(resA$p < 0.05, '*', "")
-  resA$p.adj.star1.height <- resA$max + 0.45
-  resA$p.adj.star2 <- ifelse(resA$p < 0.01, '*', "")
-  resA$p.adj.star2.height <- resA$max + 0.6
-  resA$p.adj.star3 <- ifelse(resA$p < 0.001, '*', "")
-  resA$p.adj.star3.height <- resA$max + 0.75
+  } else {
+    resA$p.adj.star1 <- ifelse(resA$p < 0.05, '*', "")
+    resA$p.adj.star1.height <- resA$max + alt.heights[1]
+    resA$p.adj.star2 <- ifelse(resA$p < 0.01, '*', "")
+    resA$p.adj.star2.height <- resA$max +  alt.heights[2]
+    resA$p.adj.star3 <- ifelse(resA$p < 0.001, '*', "")
+    resA$p.adj.star3.height <- resA$max +  alt.heights[3]
+  }
 
   resA$Day <- as.numeric(resA$Day)
+  EAElong$Day <- as.numeric(EAElong$Day)
+  unique2 <- unique(EAElong$TGS)
 
   ggob = ggline(EAElong,
                 y = "Score",
@@ -54,13 +65,18 @@ ScoreCurve <- function(data, colors, title, stats){
                 color = "TGS")
   #sel = (0.01 < resA$p.adj & resA$p.adj < 0.05)
   #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-  ggob = ggob + color_palette(colors)
+  if(missing(colormatch)){
+    ggob = ggob + color_palette(colors)
+  } else if (missing(colors)){
+    ggob = ggob + scale_color_manual(
+      values = c("Alcohol Male" = 'dodgerblue', "Alcohol Female"='red',"Control Male"= 'darkblue',"Control Female"= 'darkred'))
+  }
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
   # ggob = ggob + labs(fill = "Treatment Group and Sex")
-  ggob = ggob + annotate('text', x= resA$Day - resA$Day[1] + 1, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
-  ggob = ggob + annotate('text', x= resA$Day - resA$Day[1] + 1, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
-  ggob = ggob + annotate('text', x= resA$Day - resA$Day[1] + 1, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
+  ggob = ggob + annotate('text', x= resA$Day - min(EAElong$Day) + 1, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
+  ggob = ggob + annotate('text', x= resA$Day - min(EAElong$Day) + 1, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
+  ggob = ggob + annotate('text', x= resA$Day - min(EAElong$Day) + 1, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
   # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
   # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
   # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
@@ -92,13 +108,22 @@ ScoreCurve <- function(data, colors, title, stats){
     colnames(loaded_df)[1] <- 'Day'
     colnames(loaded_df)[5] <- 'p'
     resTloaded <- merge(loaded_df, MaxScores1, by.x = 'Day', by.y = 'Day')
+    if (missing(alt.heights)){
+      resTloaded$p.adj.star1 <- ifelse(resTloaded$p < 0.05, '*', "")
+      resTloaded$p.adj.star1.height <- resTloaded$Score + 0.5
+      resTloaded$p.adj.star2 <- ifelse(resTloaded$p < 0.01, '*', "")
+      resTloaded$p.adj.star2.height <- resTloaded$Score + 0.65
+      resTloaded$p.adj.star3 <- ifelse(resTloaded$p < 0.001, '*', "")
+      resTloaded$p.adj.star3.height <- resTloaded$Score + 0.85
+    } else {
+      resA$p.adj.star1 <- ifelse(resA$p < 0.05, '*', "")
+      resA$p.adj.star1.height <- resA$max + alt.heights[1]
+      resA$p.adj.star2 <- ifelse(resA$p < 0.01, '*', "")
+      resA$p.adj.star2.height <- resA$max +  alt.heights[2]
+      resA$p.adj.star3 <- ifelse(resA$p < 0.001, '*', "")
+      resA$p.adj.star3.height <- resA$max +  alt.heights[3]
+    }
 
-    resTloaded$p.adj.star1 <- ifelse(resTloaded$p < 0.05, '*', "")
-    resTloaded$p.adj.star1.height <- resTloaded$Score + 0.45
-    resTloaded$p.adj.star2 <- ifelse(resTloaded$p < 0.01, '*', "")
-    resTloaded$p.adj.star2.height <- resTloaded$Score + 0.6
-    resTloaded$p.adj.star3 <- ifelse(resTloaded$p < 0.001, '*', "")
-    resTloaded$p.adj.star3.height <- resTloaded$Score + 0.75
 
 
     EAElongloaded <- EAElong[EAElong$TGS == group1 | EAElong$TGS == group2,]
@@ -108,13 +133,18 @@ ScoreCurve <- function(data, colors, title, stats){
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
     #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-    ggob = ggob + color_palette(colors)
+    if(missing(colormatch)){
+      ggob = ggob + color_palette(colors)
+    } else if (missing(colors)){
+      ggob = ggob + scale_color_manual(
+        values = colormatch)
+    }
     ggob = ggob + ylab('Disease Score')
     ggob = ggob + ggtitle(title)
     # ggob = ggob + labs(fill = "Treatment Group and Sex")
-    ggob = ggob + annotate('text', x= resTloaded$Day , y=resTloaded$p.adj.star1.height, label=resTloaded$p.adj.star1, size=6)
-    ggob = ggob + annotate('text', x= resTloaded$Day , y=resTloaded$p.adj.star2.height, label=resTloaded$p.adj.star2, size=6)
-    ggob = ggob + annotate('text', x= resTloaded$Day , y=resTloaded$p.adj.star3.height, label=resTloaded$p.adj.star3, size=6)
+    ggob = ggob + annotate('text', x= resTloaded$Day - min(EAElong$Day) + 1, y=resTloaded$p.adj.star1.height, label=resTloaded$p.adj.star1, size=6)
+    ggob = ggob + annotate('text', x= resTloaded$Day - min(EAElong$Day) + 1, y=resTloaded$p.adj.star2.height, label=resTloaded$p.adj.star2, size=6)
+    ggob = ggob + annotate('text', x= resTloaded$Day - min(EAElong$Day) + 1, y=resTloaded$p.adj.star3.height, label=resTloaded$p.adj.star3, size=6)
     # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
     # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
     # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
