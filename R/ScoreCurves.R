@@ -1,4 +1,4 @@
-ScoreCurve <- function(data, title, stats, alt.heights){
+ScoreCurve <- function(data, title, colormatch = NULL, stats = NULL, alt.heights = NULL){
   require(ggplot2)
   require(ggpubr)
   require(dplyr)
@@ -15,7 +15,7 @@ ScoreCurve <- function(data, title, stats, alt.heights){
   EAElong <- EAEdata %>% gather('Day', 'Score', -'Treatment', -"Sex", -"TGS")
   EAElong$Day <- as.numeric(EAElong$Day)
   EAElong$Score <- as.numeric(EAElong$Score)
-  if(missing(stats)){
+  if(is.null(stats)){
     resA <- compare_means(Score ~ TGS, EAElong, method = 'kruskal.test', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
   } else if (stats == 'parametric'){
@@ -39,7 +39,7 @@ ScoreCurve <- function(data, title, stats, alt.heights){
   colnames(resA)[colnames(resA)=="Score"] <- "max"
 
   resA <- resA[resA$p.adj != 'NaN', ]
-  if (missing(alt.heights)){
+  if (is.null(alt.heights)){
     resA$p.adj.star1 <- ifelse(resA$p < 0.05, '*', "")
     resA$p.adj.star1.height <- resA$max + 0.5
     resA$p.adj.star2 <- ifelse(resA$p < 0.01, '*', "")
@@ -62,15 +62,15 @@ ScoreCurve <- function(data, title, stats, alt.heights){
 
   ggob = ggline(EAElong,
                 y = "Score",
-                x = "Day", group = "TGS", add = "mean_se", width = 5,
-                color = "TGS")
+                x = "Day", group = "TGS", add = "mean_se", width = 5
+                )
 
-  # if(is.null(colormatch)){
-  # ggob = ggob
-  # } else {
-  #   ggob = ggob + scale_color_manual(
-  #     values = colormatch)
-  # }
+  if(is.null(colormatch)){
+  ggob = ggob
+  } else {
+    ggob = ggob + scale_color_manual(
+      values = colormatch)
+  }
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
   # ggob = ggob + labs(fill = "Treatment Group and Sex")
@@ -108,7 +108,7 @@ ScoreCurve <- function(data, title, stats, alt.heights){
     colnames(loaded_df)[1] <- 'Day'
     colnames(loaded_df)[5] <- 'p'
     resTloaded <- merge(loaded_df, MaxScores1, by.x = 'Day', by.y = 'Day')
-    if (missing(alt.heights)){
+    if (is.null(alt.heights)){
       resTloaded$p.adj.star1 <- ifelse(resTloaded$p < 0.05, '*', "")
       resTloaded$p.adj.star1.height <- resTloaded$Score + 0.45
       resTloaded$p.adj.star2 <- ifelse(resTloaded$p < 0.01, '*', "")
@@ -130,14 +130,14 @@ ScoreCurve <- function(data, title, stats, alt.heights){
 
     ggob = ggline(EAElongloaded,
                   y = "Score",
-                  x = "Day", group = "TGS", add = "mean_se", width = 5,
-                  color = "TGS")
+                  x = "Day", group = "TGS", add = "mean_se", width = 5
+                  )
     #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-    # if(is.null(colormatch)){
-    # ggob = ggob
-    # } else {
-    # ggob = ggob + scale_color_manual(values = colormatch)
-    # }
+    if(is.null(colormatch)){
+    ggob = ggob
+    } else {
+    ggob = ggob + scale_color_manual(values = colormatch)
+    }
     ggob = ggob + ylab('Disease Score')
     ggob = ggob + ggtitle(title)
     # ggob = ggob + labs(fill = "Treatment Group and Sex")
