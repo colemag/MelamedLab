@@ -64,12 +64,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
                 y = "Score",
                 x = "Day", group = "TGS", add = "mean_se", width = 5,
                 color = "TGS")
-
-  if(missing(colormatch)){
-  ggob = ggob
-  } else {
-    ggob = ggob + pallete(values = colormatch)
-  }
+  ggob = ggob + scale_colour_manual(values = colormatch)
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
   # ggob = ggob + labs(fill = "Treatment Group and Sex")
@@ -126,23 +121,18 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
 
 
     EAElongloaded <- EAElong[EAElong$TGS == group1 | EAElong$TGS == group2,]
-
+    resTloaded$Day
     ggob = ggline(EAElongloaded,
                   y = "Score",
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
-    #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-    if(missing(colormatch)){
-    ggob = ggob
-    } else {
-    ggob = ggob + scale_color_manual(values = colormatch)
-    }
+    ggob = ggob + scale_colour_manual(values = colormatch)
     ggob = ggob + ylab('Disease Score')
     ggob = ggob + ggtitle(title)
     # ggob = ggob + labs(fill = "Treatment Group and Sex")
-    ggob = ggob + annotate('text', x= resTloaded$Day- min(EAElong$Day) + 1, y=resTloaded$p.adj.star1.height, label=resTloaded$p.adj.star1, size=6)
-    ggob = ggob + annotate('text', x= resTloaded$Day- min(EAElong$Day) + 1, y=resTloaded$p.adj.star2.height, label=resTloaded$p.adj.star2, size=6)
-    ggob = ggob + annotate('text', x= resTloaded$Day- min(EAElong$Day) + 1, y=resTloaded$p.adj.star3.height, label=resTloaded$p.adj.star3, size=6)
+    ggob = ggob + annotate('text', x= resTloaded$Day - min(EAElong$Day) + 1, y=resTloaded$p.adj.star1.height, label=resTloaded$p.adj.star1, size=6)
+    ggob = ggob + annotate('text', x= resTloaded$Day - min(EAElong$Day) + 1, y=resTloaded$p.adj.star2.height, label=resTloaded$p.adj.star2, size=6)
+    ggob = ggob + annotate('text', x= resTloaded$Day - min(EAElong$Day) + 1, y=resTloaded$p.adj.star3.height, label=resTloaded$p.adj.star3, size=6)
     # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
     # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
     # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
@@ -151,6 +141,12 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
     print(ggob)
     ggsave(paste0(name, "ScoreCurve.eps"), plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
     dev.off()
+    # dfcolor<- as.data.frame(colormatch)
+    # colormatchloaded <- dfcolor[rownames(dfcolor) == (unique(EAElongloaded$TGS)),]
+    # colorsloaded <- as.data.frame(colormatchloaded)
+    # ggob = ggob + scale_colour_manual(values = colortemp)
+
+
     i = i+1
 
 
