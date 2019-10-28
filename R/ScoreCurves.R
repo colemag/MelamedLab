@@ -62,8 +62,8 @@ ScoreCurve <- function(data, title, colormatch = NULL, stats = NULL, alt.heights
 
   ggob = ggline(EAElong,
                 y = "Score",
-                x = "Day", group = "TGS", add = "mean_se", width = 5
-                )
+                x = "Day", group = "TGS", add = "mean_se", width = 5,
+                color = "TGS")
 
   if(is.null(colormatch)){
   ggob = ggob
@@ -130,8 +130,8 @@ ScoreCurve <- function(data, title, colormatch = NULL, stats = NULL, alt.heights
 
     ggob = ggline(EAElongloaded,
                   y = "Score",
-                  x = "Day", group = "TGS", add = "mean_se", width = 5
-                  )
+                  x = "Day", group = "TGS", add = "mean_se", width = 5,
+                  color = "TGS")
     #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
     if(is.null(colormatch)){
     ggob = ggob
