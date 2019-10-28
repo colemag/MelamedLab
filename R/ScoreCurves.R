@@ -135,7 +135,7 @@ ScoreCurve <- function(data, colors, title, stats, colormatch, alt.heights){
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
     #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-    if(missing(colormatch)){
+    if (missing(colormatch)){
       ggob = ggob + color_palette(colors)
     }
     if (missing(colors)){
@@ -145,9 +145,9 @@ ScoreCurve <- function(data, colors, title, stats, colormatch, alt.heights){
     ggob = ggob + ylab('Disease Score')
     ggob = ggob + ggtitle(title)
     # ggob = ggob + labs(fill = "Treatment Group and Sex")
-    ggob = ggob + annotate('text', x= resTloaded$Day - min(EAElong$Day) + 1, y=resTloaded$p.adj.star1.height, label=resTloaded$p.adj.star1, size=6)
-    ggob = ggob + annotate('text', x= resTloaded$Day - min(EAElong$Day) + 1, y=resTloaded$p.adj.star2.height, label=resTloaded$p.adj.star2, size=6)
-    ggob = ggob + annotate('text', x= resTloaded$Day - min(EAElong$Day) + 1, y=resTloaded$p.adj.star3.height, label=resTloaded$p.adj.star3, size=6)
+    ggob = ggob + annotate('text', x= resTloaded$Day, y=resTloaded$p.adj.star1.height, label=resTloaded$p.adj.star1, size=6)
+    ggob = ggob + annotate('text', x= resTloaded$Day, y=resTloaded$p.adj.star2.height, label=resTloaded$p.adj.star2, size=6)
+    ggob = ggob + annotate('text', x= resTloaded$Day, y=resTloaded$p.adj.star3.height, label=resTloaded$p.adj.star3, size=6)
     # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
     # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
     # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
