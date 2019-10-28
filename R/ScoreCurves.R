@@ -66,8 +66,8 @@ ScoreCurve <- function(data, title, stats, colormatch, alt.heights){
                 color = "TGS")
   #sel = (0.01 < resA$p.adj & resA$p.adj < 0.05)
   #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-  if(missing(colormatch)){
-
+  if(is.null(colormatch)){
+  ggob = ggob
   } else {
     ggob = ggob + scale_color_manual(
       values = colormatch)
@@ -134,11 +134,10 @@ ScoreCurve <- function(data, title, stats, colormatch, alt.heights){
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
     #ggob = ggob + geom_signif(data=anno_df, aes(xmin = group1, xmax = group2, annotations = p.adj, y_position = y_pos), manual= TRUE)
-    if(missing(colormatch)){
-
+    if(is.null(colormatch)){
+    ggob = ggob
     } else {
-      ggob = ggob + scale_color_manual(
-        values = colormatch)
+    ggob = ggob + scale_color_manual(values = colormatch)
     }
     ggob = ggob + ylab('Disease Score')
     ggob = ggob + ggtitle(title)
