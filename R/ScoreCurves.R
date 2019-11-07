@@ -64,7 +64,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
                 y = "Score",
                 x = "Day", group = "TGS", add = "mean_se", width = 5,
                 color = "TGS")
-  ggob = ggob + scale_colour_manual(values = colormatch)
+  ggob = ggob + scale_colour_manual(values = colormatch) + scale_colour_discrete(name = "Treatment Group and Sex")
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
   # ggob = ggob + labs(fill = "Treatment Group and Sex")
@@ -126,7 +126,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
                   y = "Score",
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
-    ggob = ggob + scale_colour_manual(values = colormatch)
+    ggob = ggob + scale_colour_manual(values = colormatch) + scale_colour_discrete(name = "Treatment Group and Sex")
     ggob = ggob + ylab('Disease Score')
     ggob = ggob + ggtitle(title)
     # ggob = ggob + labs(fill = "Treatment Group and Sex")
