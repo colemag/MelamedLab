@@ -116,13 +116,13 @@ ScoreCurve <- function(data, title, colormatch, treatmentcolors, stats, alt.heig
   print(ggob)
   ggsave(file= "ScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
   dev.off()
-
+##############################################################################
   ### Treatment ###
   ggob = ggline(EAElong,
                 y = "Score",
                 x = "Day", group = "Treatment", add = "mean_se", width = 5,
                 color = "Treatment")
-  if(missing(treatmentcolors)){
+  if (missing(treatmentcolors)) {
     ggob = ggob + scale_colour_manual(values = c("#BF5700", "#333f48"))
   } else {
     ggob = ggob + scale_colour_manual(values = treatmentcolors)
