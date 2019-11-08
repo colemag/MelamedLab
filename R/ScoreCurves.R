@@ -19,17 +19,17 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2)
     resA <- compare_means(Score ~ TGS, EAElong, method = 'kruskal.test', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
     resTT <- compare_means(Score ~ Treatment, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
-    resTS <- compare_means(Score ~ Treatment, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
+    resTS <- compare_means(Score ~ Sex, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
   } else if (stats == 'parametric'){
     resA <- compare_means(Score ~ TGS, EAElong, method = 'anova', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 't.test', group.by = c("Day"), paired = F)
     resTT <- compare_means(Score ~ Treatment, EAElong, method = 't.test', group.by = c("Day"), paired = F)
-    resTS <- compare_means(Score ~ Treatment, EAElong, method = 't.test', group.by = c("Day"), paired = F)
+    resTS <- compare_means(Score ~ Sex, EAElong, method = 't.test', group.by = c("Day"), paired = F)
   } else {
     resA <- compare_means(Score ~ TGS, EAElong, method = 'kruskal.test', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
     resTT <- compare_means(Score ~ Treatment, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
-    resTS <- compare_means(Score ~ Treatment, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
+    resTS <- compare_means(Score ~ Sex, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
   }
 
   write.csv(resTS, file = "Sex-Comparisons.csv")
