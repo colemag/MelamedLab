@@ -1,0 +1,88 @@
+library(dplyr)
+library(tidyr)
+library(broom)
+library(ggpubr)
+library(ggplot2)
+library(ggsignif)
+setwd("/Users/colemaguire/Desktop/FlowR/Cyto")
+## Please change the path for your computer
+################################# Structure Data Frame ############################################
+flo <- read.csv("/Users/colemaguire/Desktop/Table.csv", header = T)
+## Please change the path for your computer and where the csv file you want to analyze is
+flo <- flo[1:20,1:25]
+samples <- c("1.2","1.4", "1.6","1.8", "1.10", "2.2", "2.4", '2.6', '2.8', '2.10', '3.2', '3.4', '3.6', '3.8', '3.10', '4.2', '4.4', '4.6', '4.8', '4.10')
+sampleg <- c('Alcohol Male','Alcohol Male','Alcohol Male','Alcohol Male','Alcohol Male','Alcohol Female','Alcohol Female','Alcohol Female','Alcohol Female','Alcohol Female','Control Male','Control Male','Control Male','Control Male','Control Male','Control Female','Control Female','Control Female','Control Female','Control Female')
+flo$X <- samples
+flo$group <- sampleg
+flog <- flo %>% gather('parent', 'percent', 2:25)
+flo2 <- flo[,-1]
+flogg <- flo2 %>% gather('parent', 'percent', -25)
+
+df_list <- split(flogg, with(flogg, interaction(parent)), drop = TRUE)
+## This divides the long data frame into a list of dataframes based on the "parent" (the specific population selected)
+######################################## Significance testing #########################################
+i = 2
+while (i<(length(df_list))){
+  loaded_df <- as.data.frame(df_list[i])
+  fullname <- colnames(loaded_df)[2]
+  name <- gsub("1\\.parent", "-", fullname)
+  name <- gsub("(\\..Freq..of.Parent)", "", name)
+  name <- gsub("(\\.parent)", "", name)
+  name <- gsub("(Lymphocytes.Single.Cells.Live.)", "", name)
+  name <- gsub("(\\.\\.\\.\\.)", "", name)
+  name <- gsub("(\\.\\.\\.)", "", name)
+  name <- gsub("(\\.\\.)", '+ ', name)
+  name <- gsub("(\\.)", ' ', name)
+  ## This is general substition using regular expression (regex)
+  colnames(loaded_df) = gsub(".*\\.", '', colnames(loaded_df))
+  ## https://regexr.com 
+  kruskal_res <- compare_means(percent ~ group, data = loaded_df, method = 'kruskal.test')
+  ## Kruskal Wallis test, output data.frame called kruskal_res
+  anno_df <- compare_means(percent ~ group, data = loaded_df, p.adjust.method = "BH", method = "wilcox.test") %>%
+    mutate(y_pos = 4, p.adj = format.pval(p.adj, digits = 2))
+  ## Pairwise Wilcoxon t-test, results stored as data.frame called anno_df (annotation_data.frame)
+  graph_max <- max(loaded_df$percent)
+  anno_df$y_pos <- rep_len(c((graph_max + (graph_max / 10)), (graph_max + 2*(graph_max / 10)),
+                             (graph_max + 3*(graph_max / 10)), (graph_max + 4*(graph_max / 10)), 
+                             (graph_max + 5*(graph_max / 10)), (graph_max + 6*(graph_max / 10))),
+                           length.out=6)
+  ## Changing the height of the bars on the graph to not all overlap, also to be dependent on the 
+  ## Height of the data
+  anno_df <- na.omit(anno_df)
+  ## pulls out failed stats test (typically all zeros)
+  anno_df_sig <- anno_df[anno_df$p.signif != 'ns',]
+  ## pulls out anything not significant
+  anno_df$Kruskal_Wallis <- rep_len(kruskal_res$p.adj, length.out =  nrow(anno_df))
+  ## Adding a column for the results of the Kruskal_Wallis test
+  anno_df$parent <- rep_len(name, length.out = nrow(anno_df))
+  ## Adding a column for the title of the group currently loaded in the loop
+  if (i == 2){
+    df1 <- anno_df
+    ## This starts the dataframe (df1) on the first cycle of the loop
+  } else {
+    df1 <- rbind(df1, anno_df)
+    ## On any other cycle of the loop it will add the results to the dataframe with previous loops in df1
+  }
+  ggo = ggboxplot(loaded_df, x = "group", y = "percent",
+                   color = "group", palette = c("blue", "red", "darkblue", "darkred"),
+                   order = c("Alcohol Male", "Alcohol Female","Control Male", "Control Female"),
+                   ylab = "Percentage", xlab = "Treatment", repel = TRUE, 
+                   font.label = list(size = 4, face = "plain"))
+  if (nrow(anno_df_sig) != 0) {
+    ggo = ggo + geom_signif(data = anno_df_sig, aes(xmin = group1, xmax = group2, annotations = p.signif, y_position = y_pos), manual = T)
+    ## Drops stats bars if no bars are significant
+  }
+  ggo = ggo + ggtitle(name)
+ # quartz()  ## Use for troubleshooting
+  print(ggo)
+  ggsave(paste0(name, "Boxplot.eps"), h=4.5, w=8, dpi=320, device = 'eps')
+  ## Saves graph as eps, best file I've found for publications, this is a vector file
+  print(ggo)
+  
+  i <- i+1
+  ## Move on to next dataframe in list
+}
+
+write.csv(df1, file = '/Users/colemaguire/Desktop/FlowR/Cyto/Table-Results-Cytokines.csv')
+## Save results that are graphed in a csv, also change the path for your computer
+

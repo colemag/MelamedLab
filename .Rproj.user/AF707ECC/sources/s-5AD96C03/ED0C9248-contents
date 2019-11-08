@@ -1,0 +1,17 @@
+require(devtools)
+install_github("colemag/MelamedLab")
+require(MelamedLab)
+
+mydata<-read.csv("/Users/colemaguire/Desktop/HFD data/HFD_Scores_Final.csv", row.names = 1)
+setwd("/Users/colemaguire/Desktop/HFD data/")
+
+colors <- c("HFD Male" = "blue", "HFD Female" = "red", "Control Male" = "darkblue", "Control Female" = "darkred")
+tcolors <- c("HFD" = "pink", "Control" = "purple")
+ScoreCurve(data = mydata, title = "HFD alpha", colormatch = colors, treatmentcolors = tcolors)
+
+mydata<-read.csv("/Users/colemaguire/Desktop/Melamed/Day10-alcohol/LADay10_SICK.csv", row.names = 1)
+mydata <- dft(mydata)
+setwd("/Users/colemaguire/Desktop/Melamed/Day10-alcohol/")
+colors <- c("Alcohol Male" = "blue", "Alcohol Female" = "red", "Control Male" = "darkblue", "Control Female" = "darkred")
+tcolors <- c("Alcohol" = "pink", "Control" = "purple")
+ScoreCurve(data = mydata, title = "Day 10 Alcohol", colormatch = colors)

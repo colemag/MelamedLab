@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1572220774302.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3910735124",
+    "id" : "C0A47E8C",
+    "lastKnownWriteTime" : 1573182995,
+    "last_content_update" : 1573182995041,
+    "path" : "~/MelamedLabPackage/MelamedLab/R/ScoreCurves.R",
+    "project_path" : "R/ScoreCurves.R",
+    "properties" : {
+        "cursorPosition" : "0,83",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
