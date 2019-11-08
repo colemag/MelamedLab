@@ -60,6 +60,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
   EAElong$Day <- as.numeric(EAElong$Day)
   unique2 <- unique(EAElong$TGS)
 
+  ### Treatment Group and Sex (TGS) ###
   ggob = ggline(EAElong,
                 y = "Score",
                 x = "Day", group = "TGS", add = "mean_se", width = 5,
@@ -80,6 +81,29 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
   #pdf(paste0(title, ".pdf"), width=8, height=4, res = 300)
   print(ggob)
   ggsave(file= "ScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
+  dev.off()
+
+  ### Treatment ###
+  ggob = ggline(EAElong,
+                y = "Score",
+                x = "Day", group = "Treatment", add = "mean_se", width = 5,
+                color = "Treatment")
+  ggob = ggob + scale_colour_manual(values = colormatch)
+  ggob = ggob + ylab('Disease Score')
+  ggob = ggob + ggtitle(title)
+  # ggob = ggob + labs(fill = "Treatment Group and Sex")
+  ggob = ggob + annotate('text', x= resA$Day - min(EAElong$Day) + 1, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
+  ggob = ggob + annotate('text', x= resA$Day - min(EAElong$Day) + 1, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
+  ggob = ggob + annotate('text', x= resA$Day - min(EAElong$Day) + 1, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
+  # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
+  # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
+  # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
+  ggob = ggob + theme(
+    axis.text.x.bottom = element_text(size=8)
+  )
+  #pdf(paste0(title, ".pdf"), width=8, height=4, res = 300)
+  print(ggob)
+  ggsave(file= "TreatmentScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
   dev.off()
   ##########################################################################################################################
   unique <- split(resT, list(resT$group1, resT$group2))
@@ -145,8 +169,6 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
     # colormatchloaded <- dfcolor[rownames(dfcolor) == (unique(EAElongloaded$TGS)),]
     # colorsloaded <- as.data.frame(colormatchloaded)
     # ggob = ggob + scale_colour_manual(values = colortemp)
-
-
     i = i+1
 
 
