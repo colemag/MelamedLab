@@ -1,4 +1,4 @@
-ScoreCurve <- function(data, title, colormatch, stats, alt.heights, treatmentcolors){
+ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2){
   require(ggplot2)
   require(ggpubr)
   require(dplyr)
@@ -122,10 +122,10 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, treatmentcol
                 y = "Score",
                 x = "Day", group = "Treatment", add = "mean_se", width = 5,
                 color = "Treatment")
-  if (missing(treatmentcolors)) {
+  if (missing(colormatch2)) {
     ggob = ggob + scale_colour_manual(values = c("#BF5700", "#333f48"))
   } else {
-    ggob = ggob + scale_colour_manual(values = treatmentcolors)
+    ggob = ggob + scale_colour_manual(values = colormatch2)
   }
 
   ggob = ggob + ylab('Disease Score')

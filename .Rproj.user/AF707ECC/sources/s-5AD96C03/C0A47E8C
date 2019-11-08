@@ -5,15 +5,15 @@
     "dirty" : false,
     "encoding" : "UTF-8",
     "folds" : "",
-    "hash" : "3910735124",
+    "hash" : "0",
     "id" : "C0A47E8C",
-    "lastKnownWriteTime" : 1573182995,
-    "last_content_update" : 1573182995041,
+    "lastKnownWriteTime" : 1573183100,
+    "last_content_update" : 1573183100307,
     "path" : "~/MelamedLabPackage/MelamedLab/R/ScoreCurves.R",
     "project_path" : "R/ScoreCurves.R",
     "properties" : {
-        "cursorPosition" : "0,83",
-        "scrollLine" : "0"
+        "cursorPosition" : "127,58",
+        "scrollLine" : "113"
     },
     "relative_order" : 2,
     "source_on_save" : false,
