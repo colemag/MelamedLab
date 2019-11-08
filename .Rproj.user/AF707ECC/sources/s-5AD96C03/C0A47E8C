@@ -7,13 +7,13 @@
     "folds" : "",
     "hash" : "0",
     "id" : "C0A47E8C",
-    "lastKnownWriteTime" : 1573183100,
-    "last_content_update" : 1573183100307,
+    "lastKnownWriteTime" : 1573183303,
+    "last_content_update" : 1573183303858,
     "path" : "~/MelamedLabPackage/MelamedLab/R/ScoreCurves.R",
     "project_path" : "R/ScoreCurves.R",
     "properties" : {
-        "cursorPosition" : "127,58",
-        "scrollLine" : "113"
+        "cursorPosition" : "146,6",
+        "scrollLine" : "136"
     },
     "relative_order" : 2,
     "source_on_save" : false,

@@ -118,29 +118,48 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2)
   dev.off()
 ##############################################################################
   ### Treatment ###
-  ggob = ggline(EAElong,
-                y = "Score",
-                x = "Day", group = "Treatment", add = "mean_se", width = 5,
-                color = "Treatment")
-  if (missing(colormatch2)) {
-    ggob = ggob + scale_colour_manual(values = c("#BF5700", "#333f48"))
-  } else {
+  if(!missing(colormatch2)){
+    ggob = ggline(EAElong,
+                  y = "Score",
+                  x = "Day", group = "Treatment", add = "mean_se", width = 5,
+                  color = "Treatment")
+    # ggob = ggob + scale_colour_manual(values = c("#BF5700", "#333f48"))
     ggob = ggob + scale_colour_manual(values = colormatch2)
+    ggob = ggob + ylab('Disease Score')
+    ggob = ggob + ggtitle(title)
+    # ggob = ggob + labs(fill = "Treatment Group and Sex")
+    ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star1.height, label=resTT$p.adj.star1, size=6)
+    ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star2.height, label=resTT$p.adj.star2, size=6)
+    ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star3.height, label=resTT$p.adj.star3, size=6)
+    ggob = ggob + theme(
+      axis.text.x.bottom = element_text(size=8)
+    )
+    #pdf(paste0(title, ".pdf"), width=8, height=4, res = 300)
+    print(ggob)
+    ggsave(file= "TreatmentScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
+    dev.off()
+  } else {
+    ggob = ggline(EAElong,
+                  y = "Score",
+                  x = "Day", group = "Treatment", add = "mean_se", width = 5,
+                  color = "Treatment")
+    ggob = ggob + scale_colour_manual(values = c("#BF5700", "#333f48"))
+    # ggob = ggob + scale_colour_manual(values = colormatch2)
+    ggob = ggob + ylab('Disease Score')
+    ggob = ggob + ggtitle(title)
+    # ggob = ggob + labs(fill = "Treatment Group and Sex")
+    ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star1.height, label=resTT$p.adj.star1, size=6)
+    ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star2.height, label=resTT$p.adj.star2, size=6)
+    ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star3.height, label=resTT$p.adj.star3, size=6)
+    ggob = ggob + theme(
+      axis.text.x.bottom = element_text(size=8)
+    )
+    #pdf(paste0(title, ".pdf"), width=8, height=4, res = 300)
+    print(ggob)
+    ggsave(file= "TreatmentScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
+    dev.off()
   }
 
-  ggob = ggob + ylab('Disease Score')
-  ggob = ggob + ggtitle(title)
-  # ggob = ggob + labs(fill = "Treatment Group and Sex")
-  ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star1.height, label=resTT$p.adj.star1, size=6)
-  ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star2.height, label=resTT$p.adj.star2, size=6)
-  ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star3.height, label=resTT$p.adj.star3, size=6)
-  ggob = ggob + theme(
-    axis.text.x.bottom = element_text(size=8)
-  )
-  #pdf(paste0(title, ".pdf"), width=8, height=4, res = 300)
-  print(ggob)
-  ggsave(file= "TreatmentScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
-  dev.off()
   ##########################################################################################################################
   unique <- split(resT, list(resT$group1, resT$group2))
   unique <- unique[sapply(unique, function(x) dim(x)[1]) > 0]

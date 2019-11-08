@@ -7,7 +7,7 @@ setwd("/Users/colemaguire/Desktop/HFD data/")
 
 colors <- c("HFD Male" = "blue", "HFD Female" = "red", "Control Male" = "darkblue", "Control Female" = "darkred")
 tcolors <- c("HFD" = "pink", "Control" = "purple")
-ScoreCurve(data = mydata, title = "HFD alpha", colormatch = colors, treatmentcolors = tcolors)
+ScoreCurve(data = mydata, title = "HFD alpha", colormatch = colors, colormatch2 = tcolors)
 
 mydata<-read.csv("/Users/colemaguire/Desktop/Melamed/Day10-alcohol/LADay10_SICK.csv", row.names = 1)
 mydata <- dft(mydata)
