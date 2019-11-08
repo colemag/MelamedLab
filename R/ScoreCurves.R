@@ -1,4 +1,4 @@
-ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
+ScoreCurve <- function(data, title, colormatch, treatmentcolors, stats, alt.heights){
   require(ggplot2)
   require(ggpubr)
   require(dplyr)
@@ -18,15 +18,22 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
   if(missing(stats)){
     resA <- compare_means(Score ~ TGS, EAElong, method = 'kruskal.test', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
+    resTT <- compare_means(Score ~ Treatment, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
+    resTS <- compare_means(Score ~ Treatment, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
   } else if (stats == 'parametric'){
     resA <- compare_means(Score ~ TGS, EAElong, method = 'anova', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 't.test', group.by = c("Day"), paired = F)
+    resTT <- compare_means(Score ~ Treatment, EAElong, method = 't.test', group.by = c("Day"), paired = F)
+    resTS <- compare_means(Score ~ Treatment, EAElong, method = 't.test', group.by = c("Day"), paired = F)
   } else {
     resA <- compare_means(Score ~ TGS, EAElong, method = 'kruskal.test', group.by = c("Day"), paired = F)
     resT <- compare_means(Score ~ TGS, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
+    resTT <- compare_means(Score ~ Treatment, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
+    resTS <- compare_means(Score ~ Treatment, EAElong, method = 'wilcox.test', group.by = c("Day"), paired = F)
   }
 
-
+  write.csv(resTS, file = "Sex-Comparisons.csv")
+  write.csv(resTT, file = "Treatment-Comparisons.csv")
   write.csv(resT, file = "Two-Group-Comparisons.csv")
   write.csv(resA, file = "All-Group-Comparisons.csv")
 
@@ -34,11 +41,20 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
     group_by(Day, TGS) %>%
     summarise_all(funs(mean))
 
+  MeanT <- EAElong %>%
+    group_by(Day, Treatment) %>%
+    summarise_all(funs(mean))
+
   MaxScores <- aggregate(Score ~ Day, data = Mean, max)
   resA <- merge(resA, MaxScores, by=c('Day', 'Day'))
   colnames(resA)[colnames(resA)=="Score"] <- "max"
-
   resA <- resA[resA$p.adj != 'NaN', ]
+
+  MaxScoresT <- aggregate(Score ~ Day, data = MeanT, max)
+  resTT <- merge(resTT, MaxScoresT, by=c('Day', 'Day'))
+  colnames(resTT)[colnames(resTT)=="Score"] <- "max"
+  resTT <- resTT[resTT$p.adj != 'NaN', ]
+
   if (missing(alt.heights)){
     resA$p.adj.star1 <- ifelse(resA$p < 0.05, '*', "")
     resA$p.adj.star1.height <- resA$max + 0.5
@@ -56,7 +72,25 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
     resA$p.adj.star3.height <- resA$max +  alt.heights[3]
   }
 
+  if (missing(alt.heights)){
+    resTT$p.adj.star1 <- ifelse(resTT$p < 0.05, '*', "")
+    resTT$p.adj.star1.height <- resTT$max + 0.5
+    resTT$p.adj.star2 <- ifelse(resTT$p < 0.01, '*', "")
+    resTT$p.adj.star2.height <- resTT$max + 0.65
+    resTT$p.adj.star3 <- ifelse(resTT$p < 0.001, '*', "")
+    resTT$p.adj.star3.height <- resTT$max + 0.80
+
+  } else {
+    resTT$p.adj.star1 <- ifelse(resTT$p < 0.05, '*', "")
+    resTT$p.adj.star1.height <- resTT$max + alt.heights[1]
+    resTT$p.adj.star2 <- ifelse(resTT$p < 0.01, '*', "")
+    resTT$p.adj.star2.height <- resTT$max +  alt.heights[2]
+    resTT$p.adj.star3 <- ifelse(resTT$p < 0.001, '*', "")
+    resTT$p.adj.star3.height <- resTT$max +  alt.heights[3]
+  }
+
   resA$Day <- as.numeric(resA$Day)
+  resTT$Day <- as.numeric(resTT$Day)
   EAElong$Day <- as.numeric(EAElong$Day)
   unique2 <- unique(EAElong$TGS)
 
@@ -65,7 +99,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
                 y = "Score",
                 x = "Day", group = "TGS", add = "mean_se", width = 5,
                 color = "TGS")
-  ggob = ggob + scale_colour_manual(values = colormatch) + scale_colour_discrete(name = "Treatment Group and Sex")
+  ggob = ggob + scale_colour_manual(values = colormatch)
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
   # ggob = ggob + labs(fill = "Treatment Group and Sex")
@@ -88,16 +122,18 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
                 y = "Score",
                 x = "Day", group = "Treatment", add = "mean_se", width = 5,
                 color = "Treatment")
-  ggob = ggob + scale_colour_manual(values = colormatch)
+  if(missing(treatmentcolors)){
+    ggob = ggob + scale_colour_manual(values = c("#BF5700", "#333f48"))
+  } else {
+    ggob = ggob + scale_colour_manual(values = treatmentcolors)
+  }
+
   ggob = ggob + ylab('Disease Score')
   ggob = ggob + ggtitle(title)
   # ggob = ggob + labs(fill = "Treatment Group and Sex")
-  ggob = ggob + annotate('text', x= resA$Day - min(EAElong$Day) + 1, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
-  ggob = ggob + annotate('text', x= resA$Day - min(EAElong$Day) + 1, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
-  ggob = ggob + annotate('text', x= resA$Day - min(EAElong$Day) + 1, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
-  # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star1.height, label=resA$p.adj.star1, size=6)
-  # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star2.height, label=resA$p.adj.star2, size=6)
-  # ggob = ggob + annotate('text', x= resA$Day, y=resA$p.adj.star3.height, label=resA$p.adj.star3, size=6)
+  ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star1.height, label=resTT$p.adj.star1, size=6)
+  ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star2.height, label=resTT$p.adj.star2, size=6)
+  ggob = ggob + annotate('text', x= resTT$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star3.height, label=resTT$p.adj.star3, size=6)
   ggob = ggob + theme(
     axis.text.x.bottom = element_text(size=8)
   )
@@ -150,7 +186,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights){
                   y = "Score",
                   x = "Day", group = "TGS", add = "mean_se", width = 5,
                   color = "TGS")
-    ggob = ggob + scale_colour_manual(values = colormatch) + scale_colour_discrete(name = "Treatment Group and Sex")
+    ggob = ggob + scale_colour_manual(values = colormatch)
     ggob = ggob + ylab('Disease Score')
     ggob = ggob + ggtitle(title)
     # ggob = ggob + labs(fill = "Treatment Group and Sex")
