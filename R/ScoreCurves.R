@@ -234,7 +234,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
   ################## Adaption of Histograms and Alignment of Scores
   if (poisson == FALSE){
 
-  } else {
+  } else if (poisson == TRUE) {
     EAElong$start <- (EAElong %>%
                         group_by(rowname) %>%
                         summarize(start=min(as.numeric(as.character(Day[Score > 0])), na.rm=TRUE)) %>%
