@@ -1,4 +1,4 @@
-ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2){
+ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2, poisson = FALSE){
   require(ggplot2)
   require(ggpubr)
   require(dplyr)
@@ -10,9 +10,10 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2)
     return(data.frame(tdf, check.names=FALSE, stringsAsFactors=FALSE))
   }
   EAEdata <- na.omit(data)
+  EAEdata <- add_rownames(EAEdata)
   colnames(EAEdata) <- gsub('X', '', colnames(EAEdata))
   EAEdata$TGS <- paste(EAEdata$Treatment, EAEdata$Sex)
-  EAElong <- EAEdata %>% gather('Day', 'Score', -'Treatment', -"Sex", -"TGS")
+  EAElong <- EAEdata %>% gather('Day', 'Score', -'Treatment', -"Sex", -"TGS", -"rowname")
   EAElong$Day <- as.numeric(EAElong$Day)
   EAElong$Score <- as.numeric(EAElong$Score)
   if(missing(stats)){
@@ -116,7 +117,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2)
   print(ggob)
   ggsave(file= "ScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
   dev.off()
-##############################################################################
+  ##############################################################################
   ### Treatment ###
   if(!missing(colormatch2)){
     ggob = ggline(EAElong,
@@ -228,6 +229,46 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2)
 
 
 
+  }
+
+  ################## Adaption of Histograms and Alignment of Scores
+  if (poisson = FALSE){
+
+  } else {
+    EAElong$start <- (EAElong %>%
+                        group_by(rowname) %>%
+                        summarize(start=min(as.numeric(as.character(Day[Score > 0])), na.rm=TRUE)) %>%
+                        as.data.frame %>%
+                        set_index('rowname'))[EAElong$rowname, 'start']
+    EAElong$'Day (offset)' = as.numeric(as.character(EAElong$Day)) - EAElong$start
+
+    EAEoff = EAElong[ , c('Day (offset)', 'rowname', 'Score')] %>%
+      spread(rowname, Score) %>%
+      set_index('Day (offset)')
+
+    highCounts = EAElong %>%
+      filter(as.integer(as.character(Day)) <= 40) %>%
+      group_by(rowname, Treatment, Sex) %>%
+      summarize(Score = sum(Score[!is.na(Score)] >= 2))
+
+    ggo = ggplot(highCounts, aes(x=Score))
+    ggo = ggo + facet_wrap(~ Treatment, nrow=2)
+    ggo = ggo + geom_histogram(aes(fill=Sex), position='stack')
+    ggo = ggo + theme_bw() + theme(
+      panel.grid.minor = element_blank(),
+      strip.background = element_rect(fill='ghostwhite')
+    )
+    ggo = ggo + scale_fill_manual(values=c('#FF5050', 'dodgerblue'))
+    ggo = ggo + xlab('Number of Days with EAE >= 2')
+    ggo = ggo + ylab('Number of Individuals')
+    png('high_eae_counts_histogram.png', h=960, w=960*1, res=144*1.65)
+    print(ggo)
+    garbage = dev.off()
+
+    poissonNoInteractionModel = glm(Score ~  Treatment + Sex,
+                                    family = poisson(link='log'),
+                                    data = highCounts)
+    drop1(poissonNoInteractionModel, test='LRT')
   }
 
 
