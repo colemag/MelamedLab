@@ -232,7 +232,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
   }
 
   ################## Adaption of Histograms and Alignment of Scores
-  if (poisson = FALSE){
+  if (poisson == FALSE){
 
   } else {
     EAElong$start <- (EAElong %>%
