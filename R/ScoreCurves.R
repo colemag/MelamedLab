@@ -3,6 +3,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
   require(ggpubr)
   require(dplyr)
   require(tidyr)
+  require(lmerTest)
   dft = function(df) {
     tdf = t(df)
     colnames(tdf) = rownames(df)
@@ -235,18 +236,19 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
   if (poisson == FALSE){
 
   } else if (poisson == TRUE) {
-    EAElong$start <- (EAElong %>%
-                        group_by(rowname) %>%
-                        summarize(start=min(as.numeric(as.character(Day[Score > 0])), na.rm=TRUE)) %>%
-                        as.data.frame %>%
-                        set_index('rowname'))[EAElong$rowname, 'start']
-    EAElong$'Day (offset)' = as.numeric(as.character(EAElong$Day)) - EAElong$start
+    EAElongrm0 <- EAElong[EAElong$start != "Inf",]
+    EAElongrm0$start <- (EAElongrm0 %>%
+                           group_by(rowname) %>%
+                           summarize(start=min(as.numeric(as.character(Day[Score > 0])), na.rm=TRUE)) %>%
+                           as.data.frame %>%
+                           set_index('rowname'))[EAElongrm0$rowname, 'start']
+    EAElongrm0$'Day (offset)' = as.numeric(as.character(EAElongrm0$Day)) - EAElongrm0$start
 
-    EAEoff = EAElong[ , c('Day (offset)', 'rowname', 'Score')] %>%
+    EAEoff = EAElongrm0[ , c('Day (offset)', 'rowname', 'Score')] %>%
       spread(rowname, Score) %>%
       set_index('Day (offset)')
 
-    highCounts = EAElong %>%
+    highCounts = EAElongrm0 %>%
       filter(as.integer(as.character(Day)) <= 40) %>%
       group_by(rowname, Treatment, Sex) %>%
       summarize(Score = sum(Score[!is.na(Score)] >= 2))
@@ -261,14 +263,99 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
     ggo = ggo + scale_fill_manual(values=c('#FF5050', 'dodgerblue'))
     ggo = ggo + xlab('Number of Days with EAE >= 2')
     ggo = ggo + ylab('Number of Individuals')
-    png('high_eae_counts_histogram.png', h=960, w=960*1, res=144*1.65)
     print(ggo)
-    garbage = dev.off()
+    ggsave(file= "high_eae_counts_histogram.eps", plot = last_plot(), h=960, w=960*1, dpi=320, units = c('in'), device = "eps")
+    dev.off()
+
 
     poissonNoInteractionModel = glm(Score ~  Treatment + Sex,
                                     family = poisson(link='log'),
                                     data = highCounts)
     drop1(poissonNoInteractionModel, test='LRT')
+    ############
+    poissonNoInteractionModel = glm(Score ~  Treatment * Sex,
+                                    family = poisson(link='log'),
+                                    data = highCounts)
+    drop1(poissonNoInteractionModel, test='LRT')
+    ############
+    lmeOut = lmer(Score ~ Day * Treatment * Sex + (1 | rowname), data=EAElongrm0)
+    anova(lmeOut)
+    ############
+    lmeOff = lmer(Score ~ `Day (offset)` * Treatment * Sex + (1 | rowname), data=EAElongrm0)
+    anova(lmeOff)
+    ############
+    betterColorPanel = function(n, colors) {
+      require(gplots)
+      if (length(colors) == 2) {
+        return(colorpanel(n=n, low=colors[1], high=colors[2]))
+      }
+      nPanels = length(colors) - 1
+      nPerPanel = floor((n-1) / nPanels)
+      nInPanel = rep(nPerPanel, times=nPanels)
+      for (i in 1:(n-nPerPanel*nPanels)) {
+        nInPanel[i] = nPerPanel + 1
+      }
+      out = colorpanel(n=nInPanel[1], low=colors[1], high=colors[2])
+      for (p in 2:nPanels) {
+        if (nInPanel[p] == 1) {
+          out = c(out, colors[p+1])
+        } else if (nInPanel[p] > 0) {
+          out = c(out, colorpanel(
+            n=nInPanel[p]+1, low=colors[p], high=colors[p+1])[-1])
+        }
+      }
+      return(out)
+    }
+    EAEdatadf <- as.data.frame(EAEdata)
+    EAEdatap <- as.data.frame(EAEdata[,-1])
+    rownames(EAEdatap) <- EAEdatadf[,1]
+
+    pheatmap(
+      mat = subset(EAEdatap, select=-c(Treatment,Sex,TGS)),
+      # betterColorPanel(75, c('skyblue',
+      #                       'goldenrod', 'orangered', 'firebrick', 'darkred')),
+      annotation_row = EAEdatap[,c("Treatment", "Sex")],
+      annotation_colors = list(
+        Treatment = c(Control='white', HFD='black'),
+        Sex = c(Female='#FF5050', Male='dodgerblue')
+      ),
+      cluster_cols = FALSE,
+      clustering_method = 'complete',
+      clustering_distance_rows = 'manhattan',
+      show_colnames = FALSE,
+      annotation_names_row = FALSE,
+      cutree_rows = 4
+    )
+    ggsave(file= "scores-heir-cluster.eps", plot = last_plot(), h=1920, w=1920*1.5, dpi=320, units = c('px'), device = "eps")
+    dev.off()
+
+    ######################### Aligned Heatmap ###########################
+    ## This is the result of Dennis' genius
+    AlignedEAElong = EAElongrm0[ , c('Day (offset)', 'rowname', 'Score')] %>%
+      spread(rowname, Score) %>%
+      set_index('Day (offset)')
+
+    pheatmap(
+      mat = dft(AlignedEAElong),
+      # betterColorPanel(75, c('skyblue',
+      #                       'goldenrod', 'orangered', 'firebrick', 'darkred')),
+      annotation_row = EAEdatap[,c("Treatment", "Sex")],
+      annotation_colors = list(
+        Treatment = c(Control='white', HFD='black'),
+        Sex = c(Female='#FF5050', Male='dodgerblue')
+      ),
+      cluster_cols = FALSE,
+      clustering_method = 'complete',
+      clustering_distance_rows = 'manhattan',
+      show_colnames = FALSE,
+      annotation_names_row = FALSE,
+      cutree_rows = 4)
+
+      ggsave(file= "aligned-scores-heir-cluster.eps", plot = last_plot(), h=1920, w=1920*1.5, dpi=320, units = c('px'), device = "eps")
+      dev.off()
+
+
+
   }
 
 
