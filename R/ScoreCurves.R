@@ -4,6 +4,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
   require(dplyr)
   require(tidyr)
   require(lmerTest)
+  require(pheatmap)
   dft = function(df) {
     tdf = t(df)
     colnames(tdf) = rownames(df)
@@ -119,7 +120,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
   ggsave(file= "ScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
   dev.off()
   ##############################################################################
-  ### Treatment ###
+  ####################### Treatment ###########################
   if(!missing(colormatch2)){
     ggob = ggline(EAElong,
                   y = "Score",
@@ -139,8 +140,29 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
     #pdf(paste0(title, ".pdf"), width=8, height=4, res = 300)
     print(ggob)
     ggsave(file= "TreatmentScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
+    ####################### Sex ###########################
+    dev.off()
+    ggob = ggline(EAElong,
+                  y = "Score",
+                  x = "Day", group = "Sex", add = "mean_se", width = 5,
+                  color = "Sex")
+    # ggob = ggob + scale_colour_manual(values = c("#BF5700", "#333f48"))
+    ggob = ggob + scale_colour_manual(values = colormatch2)
+    ggob = ggob + ylab('Disease Score')
+    ggob = ggob + ggtitle(title)
+    # ggob = ggob + labs(fill = "Treatment Group and Sex")
+    ggob = ggob + annotate('text', x= resTS$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star1.height, label=resTT$p.adj.star1, size=6)
+    ggob = ggob + annotate('text', x= resTS$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star2.height, label=resTT$p.adj.star2, size=6)
+    ggob = ggob + annotate('text', x= resTS$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star3.height, label=resTT$p.adj.star3, size=6)
+    ggob = ggob + theme(
+      axis.text.x.bottom = element_text(size=8)
+    )
+    #pdf(paste0(title, ".pdf"), width=8, height=4, res = 300)
+    print(ggob)
+    ggsave(file= "SexScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
     dev.off()
   } else {
+    ####################### Treatment ###########################
     ggob = ggline(EAElong,
                   y = "Score",
                   x = "Day", group = "Treatment", add = "mean_se", width = 5,
@@ -159,6 +181,26 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
     #pdf(paste0(title, ".pdf"), width=8, height=4, res = 300)
     print(ggob)
     ggsave(file= "TreatmentScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
+    dev.off()
+    ####################### Sex ###########################
+    ggob = ggline(EAElong,
+                  y = "Score",
+                  x = "Day", group = "Sex", add = "mean_se", width = 5,
+                  color = "Sex")
+    ggob = ggob + scale_colour_manual(values = c("#BF5700", "#333f48"))
+    # ggob = ggob + scale_colour_manual(values = colormatch2)
+    ggob = ggob + ylab('Disease Score')
+    ggob = ggob + ggtitle(title)
+    # ggob = ggob + labs(fill = "Treatment Group and Sex")
+    ggob = ggob + annotate('text', x= resTS$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star1.height, label=resTT$p.adj.star1, size=6)
+    ggob = ggob + annotate('text', x= resTS$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star2.height, label=resTT$p.adj.star2, size=6)
+    ggob = ggob + annotate('text', x= resTS$Day - min(EAElong$Day) + 1, y=resTT$p.adj.star3.height, label=resTT$p.adj.star3, size=6)
+    ggob = ggob + theme(
+      axis.text.x.bottom = element_text(size=8)
+    )
+    #pdf(paste0(title, ".pdf"), width=8, height=4, res = 300)
+    print(ggob)
+    ggsave(file= "SexScoreCurve.eps", plot = last_plot(), h=4, w=8, dpi=320, units = c('in'), device = "eps")
     dev.off()
   }
 
@@ -264,7 +306,7 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
     ggo = ggo + xlab('Number of Days with EAE >= 2')
     ggo = ggo + ylab('Number of Individuals')
     print(ggo)
-    ggsave(file= "high_eae_counts_histogram.eps", plot = last_plot(), h=960, w=960*1, dpi=320, units = c('in'), device = "eps")
+    ggsave(file= "high_eae_counts_histogram.eps", plot = last_plot(), h=5.5, w=4.5*1, dpi=320, units = c('in'), device = "eps")
     dev.off()
 
 
@@ -284,28 +326,6 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
     lmeOff = lmer(Score ~ `Day (offset)` * Treatment * Sex + (1 | rowname), data=EAElongrm0)
     anova(lmeOff)
     ############
-    betterColorPanel = function(n, colors) {
-      require(gplots)
-      if (length(colors) == 2) {
-        return(colorpanel(n=n, low=colors[1], high=colors[2]))
-      }
-      nPanels = length(colors) - 1
-      nPerPanel = floor((n-1) / nPanels)
-      nInPanel = rep(nPerPanel, times=nPanels)
-      for (i in 1:(n-nPerPanel*nPanels)) {
-        nInPanel[i] = nPerPanel + 1
-      }
-      out = colorpanel(n=nInPanel[1], low=colors[1], high=colors[2])
-      for (p in 2:nPanels) {
-        if (nInPanel[p] == 1) {
-          out = c(out, colors[p+1])
-        } else if (nInPanel[p] > 0) {
-          out = c(out, colorpanel(
-            n=nInPanel[p]+1, low=colors[p], high=colors[p+1])[-1])
-        }
-      }
-      return(out)
-    }
     EAEdatadf <- as.data.frame(EAEdata)
     EAEdatap <- as.data.frame(EAEdata[,-1])
     rownames(EAEdatap) <- EAEdatadf[,1]
@@ -351,8 +371,8 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
       annotation_names_row = FALSE,
       cutree_rows = 4)
 
-      ggsave(file= "aligned-scores-heir-cluster.eps", plot = last_plot(), h=1920, w=1920*1.5, dpi=320, units = c('px'), device = "eps")
-      dev.off()
+    ggsave(file= "aligned-scores-heir-cluster.eps", plot = last_plot(), h=1920, w=1920*1.5, dpi=320, units = c('px'), device = "eps")
+    dev.off()
 
 
 
