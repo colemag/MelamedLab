@@ -278,12 +278,13 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
   if (poisson == FALSE){
 
   } else if (poisson == TRUE) {
-    EAElongrm0 <- EAElong[EAElong$start != "Inf",]
+    EAElongrm0 <- EAElong
     EAElongrm0$start <- (EAElongrm0 %>%
                            group_by(rowname) %>%
                            summarize(start=min(as.numeric(as.character(Day[Score > 0])), na.rm=TRUE)) %>%
                            as.data.frame %>%
                            set_index('rowname'))[EAElongrm0$rowname, 'start']
+    #EAElongrm0 <- EAElongrm0[EAElong$start != "Inf",]
     EAElongrm0$'Day (offset)' = as.numeric(as.character(EAElongrm0$Day)) - EAElongrm0$start
 
     EAEoff = EAElongrm0[ , c('Day (offset)', 'rowname', 'Score')] %>%
@@ -308,7 +309,6 @@ ScoreCurve <- function(data, title, colormatch, stats, alt.heights, colormatch2,
     print(ggo)
     ggsave(file= "high_eae_counts_histogram.eps", plot = last_plot(), h=5.5, w=4.5*1, dpi=320, units = c('in'), device = "eps")
     dev.off()
-
 
     poissonNoInteractionModel = glm(Score ~  Treatment + Sex,
                                     family = poisson(link='log'),
